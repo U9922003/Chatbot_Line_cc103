@@ -1,0 +1,6 @@
+#指定基底 image 為 jupyter/base-notebook
+FROM jupyter/base-notebook
+
+#安裝 flask 0.12、request、line-bot-sdk
+RUN pip install --upgrade pip
+RUN pip install Flask==0.12 requests line-bot-sdk redis
