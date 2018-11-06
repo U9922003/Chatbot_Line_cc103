@@ -1,0 +1,41 @@
+version: '3'
+services:
+  redis:
+    image: redis:4.0.11
+    container_name: chatbot_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/data:/data
+
+  jupyter-tutorial:
+    build:
+      context: ./dockerfile
+      dockerfile: dockerfile-jupyter2
+    container_name: chatbot_jupyter
+    depends_on:
+      - redis
+      - mock-api-server
+    ports:
+      - "8888:8888"
+      - "5000:5000"
+    command: start-notebook.sh --NotebookApp.token=''
+    volumes:
+      - ./code:/home/jovyan/work
+
+  ngrok-external-dns:
+    image: wernight/ngrok
+    container_name: chatbot_ngrok
+    depends_on:
+      - jupyter-tutorial
+    ports:
+      - "4040:4040"
+    command: ngrok http chatbot_jupyter:5000
+
+  mock-api-server:
+    image: ajnasz/api-mock
+    container_name: chatbot_mock
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./api.md:/usr/src/app/api.md
